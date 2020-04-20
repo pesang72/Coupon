@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="du.kakaocrop.coupon.api.dao.mapper.CouponUserMapper">
+
+
+    <select id="getUserCouponList" resultType="du.kakaocrop.coupon.api.domain.UserCouponInfo">
+        select A.COUPON_SEQ, A.TITLE, A.THUMBNAIL, A.START_DATE, A.END_DATE, B.IS_USED
+        FROM tb_coupon_info A JOIN tb_coupon_user_info B
+        ON  A.COUPON_SEQ = B.COUPON_SEQ
+        WHERE B.USER_SEQ = #{userSeq}
+    </select>
+
+    <select id="getUserCoupon" resultType="du.kakaocrop.coupon.api.domain.UserCouponInfo">
+        SELECT
+        USER_SEQ,
+        COUPON_SEQ,
+        COUPON_CODE_SEQ,
+        IS_USED
+        FROM tb_coupon_user_info
+        WHERE USER_SEQ = #{userSeq} AND COUPON_SEQ = #{couponSeq}
+    </select>
+
+    <update id="processCoupon">
+        UPDATE tb_coupon_user_info
+        SET IS_USED = 'Y'
+        WHERE COUPON_SEQ = (SELECT T.COUPON_SEQ FROM (SELECT COUPON_SEQ FROM  tb_coupon_user_info WHERE USER_SEQ = #{userSeq} AND COUPON_SEQ=#{couponSeq} AND IS_USED = 'N') AS T)
+    </update>
+
+    <update id="cancelUseCoupon">
+        UPDATE tb_coupon_user_info
+        SET IS_USED = 'N'
+        WHERE COUPON_SEQ = (SELECT T.COUPON_SEQ FROM (SELECT COUPON_SEQ FROM  tb_coupon_user_info WHERE USER_SEQ = #{userSeq} AND COUPON_SEQ=#{couponSeq} AND IS_USED = 'Y') AS T)
+
+    </update>
+
+</mapper>

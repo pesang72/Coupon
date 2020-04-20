@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="du.kakaocrop.coupon.api.dao.mapper.SignMapper">
+
+    <select id="getUserByEmail" resultType="du.kakaocrop.coupon.api.domain.UserInfo">
+        SELECT
+        USER_SEQ,
+        EMAIL,
+        PASSWORD
+        FROM tb_user_mapping_info
+        WHERE EMAIL = #{email}
+    </select>
+
+    <select id="getUserBySeq"  resultType="du.kakaocrop.coupon.api.domain.UserInfo">
+        SELECT
+        USER_SEQ,
+        EMAIL,
+        PASSWORD
+        FROM tb_user_mapping_info
+        where USER_SEQ = #{userSeq}
+    </select>
+</mapper>

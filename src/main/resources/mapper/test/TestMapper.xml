@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="du.kakaocrop.coupon.api.dao.mapper.test.TestMapper">
+
+    <update id="dropCouponCodeTable">
+        drop table IF EXISTS tb_coupon_code_#{couponSeq}
+    </update>
+
+    <delete id="dropCouponInfo">
+         DELETE from tb_coupon_info WHERE COUPON_SEQ = #{couponSeq};
+    </delete>
+
+    <delete id="dropPrefixData">
+        DELETE from tb_coupon_prefix WHERE COUPON_SEQ = #{couponSeq};
+   </delete>
+
+    <delete id="dropCountData">
+        DELETE from tb_coupon_count WHERE COUPON_SEQ = #{couponSeq};
+   </delete>
+
+    <delete id="dropUserData">
+        DELETE from tb_coupon_user_info WHERE USER_SEQ=#{userSeq} AND COUPON_SEQ = #{couponSeq};;
+   </delete>
+
+    <select id="getCouponCodeRowCount" parameterType="java.lang.Long" resultType="java.lang.Long">
+        SELECT COUNT(1) FROM tb_coupon_code_${couponSeq}
+    </select>
+</mapper>

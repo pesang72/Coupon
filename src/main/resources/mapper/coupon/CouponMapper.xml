@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="du.kakaocrop.coupon.api.dao.mapper.CouponMapper">
+
+
+    <select id="getCoupon" resultType="du.kakaocrop.coupon.api.domain.CouponInfo">
+        SELECT
+        COUPON_SEQ,
+        TITLE,
+        THUMBNAIL,
+        START_DATE,
+        END_DATE,
+        REG_DATE,
+        IS_SERVICE
+        FROM tb_coupon_info
+        WHERE COUPON_SEQ = #{couponSeq}
+    </select>
+
+    <select id="getExpiredCouponWithTimestamp" parameterType="java.sql.Timestamp" resultType="du.kakaocrop.coupon.api.domain.CouponInfo">
+        SELECT
+        COUPON_SEQ,
+        TITLE,
+        THUMBNAIL,
+        START_DATE,
+        END_DATE,
+        REG_DATE
+        FROM tb_coupon_info
+        where END_DATE BETWEEN  #{start_tmp} AND #{end_tmp}
+    </select>
+
+
+
+    <select id="provideCoupon"  statementType="CALLABLE" resultType="java.lang.Integer">
+	    { call SP_PROVIDE_COUPON(#{userSeq}, #{couponSeq})}
+	</select>
+
+    <select id="registerCoupon"  statementType="CALLABLE" resultType="java.lang.Long">
+	    { call SP_REGISTER_COUPON(#{title}, #{thumbnail},#{startDate},#{endDate}, #{couponPrefix})}
+	</select>
+
+    <select id="existPrefix" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM tb_coupon_prefix
+        WHERE COUPON_PREFIX = #{prefix}
+    </select>
+
+    <update id="updateCouponCountAndStatus">
+        update tb_coupon_info
+        set COUPON_COUNT = #{createCount}, IS_SERVICE =#{y}
+        where COUPON_SEQ = #{couponSeq}
+    </update>
+</mapper>

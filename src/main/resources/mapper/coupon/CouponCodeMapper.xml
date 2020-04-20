@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="du.kakaocrop.coupon.api.dao.mapper.CouponCodeMapper">
+
+    <resultMap type="du.kakaocrop.coupon.api.domain.CouponCode" id="couponCode">
+        <result column="SEQ" property="seq" />
+        <result column="COUPON_SEQ" property="couponSeq" />
+        <result column="COUPON_CODE" property="couponCode" />
+        <result column="TARGET_USER_ID" property="targetUserId" />
+        <result column="IS_USED" property="isUsed" />
+    </resultMap>
+
+
+    <insert id="insertCouponCode" parameterType="du.kakaocrop.coupon.api.domain.CouponCode">
+        INSERT INTO tb_coupon_code_#{couponCode.couponSeq}
+        (
+        COUPON_SEQ,
+        COUPON_CODE,
+        TARGET_USER_ID,
+        IS_USED
+        )
+        VALUES
+        (
+        #{couponCode.couponSeq},
+        #{couponCode.couponCode},
+        NULL,
+        'N'
+        )
+    </insert>
+
+    <update id="processCouponCode">
+        update tb_coupon_code_#{couponSeq}
+        set IS_USED = 'Y'
+        WHERE SEQ = (SELECT T.SEQ FROM (SELECT SEQ FROM tb_coupon_code_#{couponSeq} WHERE SEQ= #{couponCodeSeq} AND IS_USED = 'N') AS T)
+    </update>
+
+    <update id="cancelUseCouponCode">
+        update tb_coupon_code_#{couponSeq}
+        set IS_USED = 'N'
+        WHERE SEQ = (SELECT T.SEQ FROM (SELECT SEQ FROM tb_coupon_code_#{couponSeq} WHERE SEQ= #{couponCodeSeq} AND IS_USED = 'Y') AS T)
+    </update>
+
+
+    <select id="getCouponCode" resultMap="couponCode">
+        select * FROM tb_coupon_code_${couponSeq}
+        WHERE SEQ = #{couponUniqueSeq}
+    </select>
+
+    <select id="getCouponCodeList" fetchSize="50" resultMap="couponCode">
+        select * FROM tb_coupon_code_${couponSeq}
+    </select>
+
+    <insert id="insertCouponCodeList" >
+        INSERT INTO tb_coupon_code_#{couponSeq}
+        (
+        COUPON_SEQ,
+        COUPON_CODE,
+        TARGET_USER_ID,
+        IS_USED
+        )
+        VALUES
+        <if test="couponCodes != null">
+            <foreach collection="couponCodes" item="item" separator=" , ">
+                (#{item.couponSeq}, #{item.couponCode},NULL, 'N')
+            </foreach>
+        </if>
+    </insert>
+</mapper>
