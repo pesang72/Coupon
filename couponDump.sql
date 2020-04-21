@@ -187,25 +187,6 @@ CREATE TABLE `batch_step_execution_seq` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `tb_coupon_code_1`
---
-
-DROP TABLE IF EXISTS `tb_coupon_code_1`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `tb_coupon_code_1` (
-  `SEQ` int NOT NULL AUTO_INCREMENT,
-  `COUPON_SEQ` mediumint DEFAULT NULL,
-  `COUPON_CODE` varchar(20) DEFAULT NULL,
-  `TARGET_USER_ID` varchar(70) DEFAULT NULL,
-  `IS_USED` varchar(1) DEFAULT 'N',
-  `REG_DATE` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `MOD_DATE` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`SEQ`)
-) ENGINE=InnoDB AUTO_INCREMENT=15601 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
 -- Table structure for table `tb_coupon_count`
 --
 
@@ -238,7 +219,7 @@ CREATE TABLE `tb_coupon_info` (
   `IS_SERVICE` varchar(1) DEFAULT 'N',
   PRIMARY KEY (`SEQ`),
   UNIQUE KEY `COUPON_IDX` (`COUPON_SEQ`)
-) ENGINE=InnoDB AUTO_INCREMENT=80 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=82 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -381,45 +362,49 @@ BEGIN
 	DECLARE VAL_TABLE_NAME VARCHAR(50);
     
     
-    SELECT MAX(COUPON_SEQ) INTO MAX_COUPON_SEQ FROM tb_coupon_info;
-    IF MAX_COUPON_SEQ IS NULL THEN
-		SET MAX_COUPON_SEQ = 0;
-    END IF;
+    DECLARE exit handler for SQLEXCEPTION
+	  BEGIN
+		ROLLBACK;        
+		SET RESULT = CONCAT('UPDATE tb_coupon_code_',IN_COUPON_SEQ);  
+        SELECT -1;
+	END;
     
-    SET MAX_COUPON_SEQ = MAX_COUPON_SEQ + 1;
-    
-    SET VAL_TABLE_NAME = CONCAT('tb_coupon_code_',MAX_COUPON_SEQ);
-    
-    
-    IF  (SELECT COUNT(1) FROM information_schema.tables WHERE table_name = VAL_TABLE_NAME) = 0 THEN
+    START TRANSACTION;		
+		SELECT MAX(COUPON_SEQ) INTO MAX_COUPON_SEQ FROM tb_coupon_info;
+		IF MAX_COUPON_SEQ IS NULL THEN
+			SET MAX_COUPON_SEQ = 0;
+		END IF;
 		
-        INSERT INTO tb_coupon_info (COUPON_SEQ,TITLE,THUMBNAIL,START_DATE,END_DATE) VALUES (MAX_COUPON_SEQ,IN_TITLE,IN_THUMBNAIL,IN_START_TIME,IN_END_TIME);
-        INSERT INTO tb_coupon_prefix (COUPON_SEQ, COUPON_PREFIX) VALUES ( MAX_COUPON_SEQ, IN_COUPON_PREFIX);
-        
-        SET @sqlStr = CONCAT('CREATE TABLE ',VAL_TABLE_NAME,' ');
-        SET @sqlStr = CONCAT(@sqlStr,'(SEQ int NOT NULL AUTO_INCREMENT,');
-        SET @sqlStr = CONCAT(@sqlStr,'COUPON_SEQ mediumint DEFAULT NULL,');
-        SET @sqlStr = CONCAT(@sqlStr,'COUPON_CODE varchar(20) DEFAULT NULL,');
-        SET @sqlStr = CONCAT(@sqlStr,'TARGET_USER_ID varchar(70) DEFAULT NULL,');
-        SET @sqlStr = CONCAT(@sqlStr,'IS_USED varchar(1) DEFAULT \'N\' , ');
-        SET @sqlStr = CONCAT(@sqlStr,'REG_DATE timestamp DEFAULT CURRENT_TIMESTAMP,');
-        SET @sqlStr = CONCAT(@sqlStr,'MOD_DATE timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,');
-        SET @sqlStr = CONCAT(@sqlStr,'PRIMARY KEY (SEQ)) ENGINE=InnoDB AUTO_INCREMENT=0');
-        
-		PREPARE stmt FROM @sqlStr;
-		EXECUTE stmt;
+		SET MAX_COUPON_SEQ = MAX_COUPON_SEQ + 1;
+		
+		SET VAL_TABLE_NAME = CONCAT('tb_coupon_code_',MAX_COUPON_SEQ);
+		
+		
+		IF  (SELECT COUNT(1) FROM information_schema.tables WHERE table_name = VAL_TABLE_NAME) = 0 THEN
 
-        IF(SELECT COUNT(1) FROM tb_coupon_count WHERE COUPON_SEQ = MAX_COUPON_SEQ) = 0 THEN
+			SET @sqlStr = CONCAT('CREATE TABLE ',VAL_TABLE_NAME,' ');
+			SET @sqlStr = CONCAT(@sqlStr,'(SEQ int NOT NULL AUTO_INCREMENT,');
+			SET @sqlStr = CONCAT(@sqlStr,'COUPON_SEQ mediumint DEFAULT NULL,');
+			SET @sqlStr = CONCAT(@sqlStr,'COUPON_CODE varchar(20) DEFAULT NULL,');
+			SET @sqlStr = CONCAT(@sqlStr,'TARGET_USER_ID varchar(70) DEFAULT NULL,');
+			SET @sqlStr = CONCAT(@sqlStr,'IS_USED varchar(1) DEFAULT \'N\' , ');
+			SET @sqlStr = CONCAT(@sqlStr,'REG_DATE timestamp DEFAULT CURRENT_TIMESTAMP,');
+			SET @sqlStr = CONCAT(@sqlStr,'MOD_DATE timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,');
+			SET @sqlStr = CONCAT(@sqlStr,'PRIMARY KEY (SEQ)) ENGINE=InnoDB AUTO_INCREMENT=0');
+			
+			PREPARE stmt FROM @sqlStr;
+			EXECUTE stmt;
+			
+			INSERT INTO tb_coupon_info (COUPON_SEQ,TITLE,THUMBNAIL,START_DATE,END_DATE) VALUES (MAX_COUPON_SEQ,IN_TITLE,IN_THUMBNAIL,IN_START_TIME,IN_END_TIME);
+			INSERT INTO tb_coupon_prefix (COUPON_SEQ, COUPON_PREFIX) VALUES ( MAX_COUPON_SEQ, IN_COUPON_PREFIX);
 			INSERT INTO tb_coupon_count (COUPON_SEQ) VALUES (MAX_COUPON_SEQ);
-            SET RESULT = MAX_COUPON_SEQ;
-        ELSE
-			SET RESULT = 3;
-        END IF;
-	
-	ELSE	
-		SET RESULT = 2;
-    END IF;
-    
+			
+			SET RESULT = MAX_COUPON_SEQ;
+		
+		ELSE	
+			SET RESULT = -1;
+		END IF;
+	COMMIT;
 	SELECT RESULT;
 END ;;
 DELIMITER ;
@@ -437,4 +422,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-04-21  4:09:01
+-- Dump completed on 2020-04-21 16:15:11

@@ -26,13 +26,20 @@ Alarm 의 경우, 5분 단위로 현재시간의 3일, 3일 5분전 시간 정�
 
 - https://documenter.getpostman.com/view/11034591/Szf6YpDy
 
+
+
 ## **예상 서비스 아키텍쳐 구조**
 
 ![](https://sgimage.netmarble.com/images/netmarble/kofkr/20200421/s8v11587404601332.PNG)
 
-## **DB**
+
+
+## **DB** (SP 는 Dump에 포함, 별도 생성코드 첨부)
 
 ![](https://sgimage.netmarble.com/images/netmarble/kofkr/20200421/9war1587404538180.PNG)
+
+- SP_PROVIDE_COUPON : 유저에게 쿠폰 발급하는 SP
+- SP_REGISTER_COUPON : 쿠폰 등록하는 SP,
 
 - TB_COUPON_INFO : 쿠폰의 정보를 가지고 있는 DB
 
